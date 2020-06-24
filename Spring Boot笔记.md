@@ -284,7 +284,7 @@ J2EE的整体整合解决方案和自动配置都在spring-boot-autoconfigure-1.
 
 ​		
 
-<!--==来自 jingyile的注解==-->
+<---------------------****来自 jingyile的注解****-------------------------->
 
 ```java
 //@ResponseBody
@@ -455,6 +455,19 @@ person:
       age: 12
 ```
 
+```properties
+person.age=18
+person.birth=2020/02/10
+person.last-name=张三   
+# last-name相当于lastName
+person.boss=true
+person.maps.k1=1
+person.maps.k2=2
+lperson.ists=[cat,dog,pig]
+person.dog.name=小狗狗
+person.dog.age=2
+```
+
 javaBean：
 
 ```java
@@ -492,6 +505,14 @@ public class Person {
 			<artifactId>spring-boot-configuration-processor</artifactId>
 			<optional>true</optional>
 		</dependency>
+```
+
+```xml
+<!--jingyile   单元测试需要加入依赖-->
+<dependency>
+    <groupId>junit</groupId>
+    <artifactId>junit</artifactId>
+</dependency>
 ```
 
 #### 1、properties配置文件在idea中默认utf-8可能会乱码
