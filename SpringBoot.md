@@ -458,14 +458,14 @@ person:
 ```properties
 person.age=18
 person.birth=2020/02/10
-person.last-name=张三   
+person.last-name=张三
 # last-name相当于lastName
 person.boss=true
 person.maps.k1=1
 person.maps.k2=2
-lperson.ists=[cat,dog,pig]
+person.lists=dog,cat,pig
 person.dog.name=小狗狗
-person.dog.age=2
+person.dog.age=2    
 ```
 
 javaBean：
@@ -523,17 +523,31 @@ public class Person {
 
 #### 2、@Value获取值和@ConfigurationProperties获取值比较
 
-|            | @ConfigurationProperties | @Value |
-| ---------- | ------------------------ | ------ |
-| 功能         | 批量注入配置文件中的属性             | 一个个指定  |
-| 松散绑定（松散语法） | 支持                       | 不支持    |
-| SpEL       | 不支持                      | 支持     |
-| JSR303数据校验 | 支持                       | 不支持    |
-| 复杂类型封装     | 支持                       | 不支持    |
+|                         | @ConfigurationProperties | @Value     |
+| ----------------------- | ------------------------ | ---------- |
+| 功能                    | 批量注入配置文件中的属性 | 一个个指定 |
+| 松散绑定（松散语法）    | 支持                     | 不支持     |
+| SpEL（表达式语言）      | 不支持                   | 支持       |
+| JSR303数据校验          | 支持                     | 不支持     |
+| 复杂类型封装（比如Maps) | 支持                     | 不支持     |
 
 配置文件yml还是properties他们都能获取到值；
 
 如果说，我们只是在某个业务逻辑中需要获取一下配置文件中的某项值，使用@Value；
+
+```java
+@RestController   
+public class HelloController {
+    @Value("${person.last-name}")
+    private  String name;
+
+    @RequestMapping("/hello")
+    public  String hello()
+    {
+        return "hello!" +name;
+    }
+}
+```
 
 如果说，我们专门编写了一个javaBean来和配置文件进行映射，我们就直接使用@ConfigurationProperties；
 
@@ -544,7 +558,7 @@ public class Person {
 ```java
 @Component
 @ConfigurationProperties(prefix = "person")
-@Validated
+@Validated    //数据校验
 public class Person {
 
     /**
@@ -557,7 +571,7 @@ public class Person {
     @Email
     //@Value("${person.last-name}")
     private String lastName;
-    //@Value("#{11*2}")
+    //@Value("#{${person.age}*2}")   支持复杂表达式
     private Integer age;
     //@Value("true")
     private Boolean boss;
@@ -584,7 +598,7 @@ public class Person {
  *  @ConfigurationProperties(prefix = "person")默认从全局配置文件中获取值；
  *
  */
-@PropertySource(value = {"classpath:person.properties"})
+@PropertySource(value = {"classpath:person.properties"})       //yml好像不可以？
 @Component
 @ConfigurationProperties(prefix = "person")
 //@Validated
@@ -622,7 +636,7 @@ Spring Boot里面没有Spring的配置文件，我们自己编写的配置文件
 
 
 
-不来编写Spring的配置文件
+不来编写Spring的配置文件（如下），因为很不方便........
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -635,7 +649,7 @@ Spring Boot里面没有Spring的配置文件，我们自己编写的配置文件
 </beans>
 ```
 
-SpringBoot推荐给容器中添加组件的方式；推荐使用全注解的方式
+SpringBoot推荐给容器中添加组件的方式；推荐使用全注解的方式！！！
 
 1、配置类**@Configuration**------>Spring配置文件
 
@@ -672,7 +686,7 @@ ${random.int(10)}、${random.int[1024,65536]}
 
 
 
-### 2、占位符获取之前配置的值，如果没有可以是用:指定默认值
+### 2、占位符获取之前配置的值，如果没有可以是用   :指定默认值
 
 ```properties
 person.last-name=张三${random.uuid}
@@ -682,7 +696,8 @@ person.boss=false
 person.maps.k1=v1
 person.maps.k2=14
 person.lists=a,b,c
-person.dog.name=${person.hello:hello}_dog
+person.dog.name=${person.hello:hello}_dog  
+person.dog.name=${person.last-name}_dog
 person.dog.age=15
 ```
 
@@ -698,7 +713,7 @@ person.dog.age=15
 
 
 
-### 2、yml支持多文档块方式
+### 2、yml支持多文档块方式  ---
 
 ```yml
 
@@ -739,6 +754,8 @@ spring:
 
 ​	3、虚拟机参数；
 
+ ![image-20200629153000279](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200629153000279.png)
+
 ​		-Dspring.profiles.active=dev
 
 
@@ -763,7 +780,7 @@ SpringBoot会从这四个位置全部加载主配置文件；**互补配置**；
 
 ==我们还可以通过spring.config.location来改变默认的配置文件位置==
 
-**项目打包好以后，我们可以使用命令行参数的形式，启动项目的时候来指定配置文件的新位置；指定配置文件和默认加载的这些配置文件共同起作用形成互补配置；**
+**项目打包好以后，我们可以使用命令行参数的形式，启动项目的时候来指定配置文件的新位置；指定配置文件和默认加载的这些配置文件共同起作用形成互补配置；**   !!!先打包，运维使用！
 
 java -jar spring-boot-02-config-02-0.0.1-SNAPSHOT.jar --spring.config.location=G:/application.properties
 
