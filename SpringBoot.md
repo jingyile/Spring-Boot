@@ -1141,13 +1141,13 @@ JUL、JCL、Jboss-logging、logback、log4j、log4j2、slf4j....
 
 日志门面：  SLF4J；
 
-日志实现：Logback；
+日志实现：Logback；    （log4j不如前者先进，三者同一作者！，而log4j2因为适配性..）
 
 
 
 SpringBoot：底层是Spring框架，Spring框架默认是用JCL；‘
 
-​	**==SpringBoot选用 SLF4j和logback；==**
+​	**==SpringBoot选用 SLF4j和logback；==**      机智的选择！！！
 
 
 
@@ -1302,7 +1302,7 @@ SpringBoot修改日志的默认配置
 ```properties
 logging.level.com.atguigu=trace
 
-
+#个人觉得应该指定位置比较好，防止找不到默认位置....
 #logging.path=
 # 不指定路径在当前项目下生成springboot.log日志
 # 可以指定完整的路径；
@@ -1333,7 +1333,7 @@ logging.pattern.file=%d{yyyy-MM-dd} === [%thread] === %-5level === %logger{50} =
 | Log4j2                  | `log4j2-spring.xml` or `log4j2.xml`      |
 | JDK (Java Util Logging) | `logging.properties`                     |
 
-logback.xml：直接就被日志框架识别了；
+logback.xml：直接就被日志框架识别了；相当于绕过spring
 
 **logback-spring.xml**：日志框架就不直接加载日志的配置项，由SpringBoot解析日志配置，可以使用SpringBoot的高级Profile功能
 
@@ -1569,13 +1569,23 @@ localhost:8080/webjars/jquery/3.3.1/jquery.js
 "/"：当前项目的根路径
 ```
 
-localhost:8080/abc ===  去静态资源文件夹里面找abc
+localhost:8080/abc ===  去静态资源文件夹里面找abc！
 
 ==3）、欢迎页； 静态资源文件夹下的所有index.html页面；被"/**"映射；==
 
 ​	localhost:8080/   找index页面
 
-==4）、所有的 **/favicon.ico  都是在静态资源文件下找；==
+==4）、设置图标！！！所有的 **/favicon.ico  都是在静态资源文件下找；==
+
+可能需要Ctrl+F5 进行网页的刷新
+
+
+
+<-----------可以自己定义静态文件夹，不过之前的默认都会失效，不怎么用------------------->
+
+```properties
+spring.resources.static-location=classpath:/hello/,classpath:/jingyile/
+```
 
 
 
@@ -1599,7 +1609,7 @@ SpringBoot推荐的Thymeleaf；
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
-          	2.1.6
+          	2.1.6  （这是教程时的版本号，现在已经不同，不需要切换）
 		</dependency>
 切换thymeleaf版本
 <properties>
@@ -1628,7 +1638,7 @@ public class ThymeleafProperties {
   	//
 ```
 
-只要我们把HTML页面放在classpath:/templates/，thymeleaf就能自动渲染；
+只要我们把HTML页面放在classpath:/templates/，thymeleaf就能自动渲染；太爽了吧！！！ 
 
 使用：
 
@@ -1639,6 +1649,8 @@ public class ThymeleafProperties {
 ```
 
 2、使用thymeleaf语法；
+
+<-------------很大的好处：如果不经过解析，可以显示前端原来的值！！！------->
 
 ```html
 <!DOCTYPE html>
@@ -1666,6 +1678,10 @@ public class ThymeleafProperties {
 
 
 2）、表达式？
+
+    Selection Variable Expressions: *{...}：选择表达式：和${}在功能上是一样；
+    	补充：配合 th:object="${session.user}：
+![image-20200708112847358](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200708112847358.png)
 
 ```properties
 Simple expressions:（表达式语法）
@@ -1703,9 +1719,12 @@ Simple expressions:（表达式语法）
     	补充：配合 th:object="${session.user}：
    <div th:object="${session.user}">
     <p>Name: <span th:text="*{firstName}">Sebastian</span>.</p>
+    //相当于  <span th:text="${session.user.firstName}">Sebastian</span>
     <p>Surname: <span th:text="*{lastName}">Pepper</span>.</p>
     <p>Nationality: <span th:text="*{nationality}">Saturn</span>.</p>
+    
     </div>
+
     
     Message Expressions: #{...}：获取国际化内容
     Link URL Expressions: @{...}：定义URL；
@@ -1737,6 +1756,13 @@ Conditional operators:条件运算（三元运算符）
     Default: (value) ?: (defaultvalue)
 Special tokens:
     No-Operation: _ 
+```
+
+```Html
+<div th:text="${hello}"></div>
+<!--text不会转义字符-->
+<div th:utext="${hello}"></div>
+<!--utext转义字符-->
 ```
 
 ## 4、SpringMVC自动配置
@@ -2128,7 +2154,7 @@ public class MyLocaleResolver implements LocaleResolver {
 
 ```
 
-### 3）、登陆
+### 3）、登录
 
 开发期间模板引擎页面修改以后，要实时生效
 
@@ -2214,6 +2240,7 @@ public class LoginHandlerInterceptor implements HandlerInterceptor {
                 //SpringBoot已经做好了静态资源映射
                 registry.addInterceptor(new LoginHandlerInterceptor()).addPathPatterns("/**")
                         .excludePathPatterns("/index.html","/","/user/login");
+                //排除几个
             }
         };
         return adapter;
@@ -2227,6 +2254,10 @@ public class LoginHandlerInterceptor implements HandlerInterceptor {
 1）、RestfulCRUD：CRUD满足Rest风格；
 
 URI：  /资源名称/资源标识       HTTP请求方式区分对资源CRUD操作
+
+统一资源标识符（Uniform Resource Identifier，URI)是一个用于标识某一互联网资源名称的字符串。
+
+URL是Uniform Resource Locator的缩写，译为"统一资源定位符"。URL是一种URI，它标识一个互联网[资源](https://baike.baidu.com/item/资源)，并指定对其进行操作或获取该资源的方法。
 
 |      | 普通CRUD（uri来区分操作） | RestfulCRUD       |
 | ---- | ------------------------- | ----------------- |
@@ -2380,11 +2411,19 @@ insert的公共片段在div标签中
 
 日期的格式化；SpringMVC将页面提交的值需要转换为指定的类型;
 
+```properties
+spring.mvc.date-format=yyyy-MM-dd
+```
+
 2017-12-12---Date； 类型转换，格式化;
 
 默认日期是按照/的方式；
 
 ### 7）、CRUD-员工修改
+
+```html
+<a class="btn btn-sm btn-primary" th:href="@{/emp/}+${emp.id}">编辑</a>
+```
 
 修改添加二合一表单
 
@@ -2392,13 +2431,15 @@ insert的公共片段在div标签中
 <!--需要区分是员工修改还是添加；-->
 <form th:action="@{/emp}" method="post">
     <!--发送put请求修改员工数据-->
-    <!--
+    <!--  可不能直接改method....
 1、SpringMVC中配置HiddenHttpMethodFilter;（SpringBoot自动配置好的）
 2、页面创建一个post表单
 3、创建一个input项，name="_method";值就是我们指定的请求方式
 -->
     <input type="hidden" name="_method" value="put" th:if="${emp!=null}"/>
+    <!--指定请求方式-->
     <input type="hidden" name="id" th:if="${emp!=null}" th:value="${emp.id}">
+    <!--员工的id也需要传过来才行-->
     <div class="form-group">
         <label>LastName</label>
         <input name="lastName" type="text" class="form-control" placeholder="zhangsan" th:value="${emp!=null}?${emp.lastName}">
@@ -2446,6 +2487,7 @@ insert的公共片段在div标签中
     <td>
         <a class="btn btn-sm btn-primary" th:href="@{/emp/}+${emp.id}">编辑</a>
         <button th:attr="del_uri=@{/emp/}+${emp.id}" class="btn btn-sm btn-danger deleteBtn">删除</button>
+       <!-- th:attr="属性名=属性值"  -->
     </td>
 </tr>
 
@@ -4198,6 +4240,57 @@ https://github.com/spring-projects/spring-boot/tree/master/spring-boot-samples
 
 
 
+# 九、其他常用操作
+
+### 1.连接数据库
+
+以mysql为例，先在pom中加入相关依赖
+
+```xml
+<dependency>
+    <groupId>mysql</groupId>
+    <artifactId>mysql-connector-java</artifactId>
+</dependency>
+```
+
+写入配置文件（两种形式写法，推荐YML)
+
+```YML
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver    #可以不写
+    username: root
+    password: 336336336
+    #    1、serverTimezone是配置时间区域，不然启动会报错
+    #     2、url 配置规则 jdbc:mysql:// + ip地址 + 端口 / 数据库名字 ? 字符编码 && 是否使用SSL && 时间区域
+    #     3、useSSL MySQL在高版本需要指明是否进行SSL连接
+    url: jdbc:mysql://localhost:3306/test?characterEncoding=utf-8&useSSL=false&&serverTimezone=UTC
+```
+
+```properties
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.datasource.username=root
+spring.datasource.password=336336336
+spring.datasource.url=jdbc:mysql://localhost:3306/test?characterEncoding=utf-8&useSSL=false&&serverTimezone=UTC
+```
+
+测试是否连接成功，可以借助测试类,测试类的pom依赖直接用编译器获取即可。
+
+```java
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class MysqlApplicationTest {
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @Test
+    public void testJdbc() {
+        List<Map<String, Object>> maps = jdbcTemplate.queryForList("select * from tb_basic_company");
+        maps.forEach(System.out::println);
+    }
+
+}
+```
 
 
 
@@ -4207,4 +4300,4 @@ https://github.com/spring-projects/spring-boot/tree/master/spring-boot-samples
 
 
 
-
+   
